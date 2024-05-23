@@ -78,18 +78,19 @@ const updateTodo = async (req, res) => {
   try {
     const { todo_id } = req.params;
     const { id } = req.decoded;
-    const { title, desc, img } = req.body;
+    const { title, desc } = req.body;
+    const img = req.file?.img;
 
-    if (!title || !description || !img) {
+    if (!title || !desc) {
       const msg = `${
-        !title ? "Title" : !description ? "Description" : "Image"
+        !title ? "Title" : "Description"
       } field cannot be empty 😠`;
       const error = new Error(msg);
       error.statusCode = 401;
       throw error;
     }
-    const command = `UPDATE todos SET title=?, description=?, img=? WHERE user_id=? AND id=?`;
-    await connection.promise().query(command, [title, desc, img, id, todo_id]);
+    const command = `UPDATE todos SET title=?, description=? WHERE user_id=? AND id=?`;
+    await connection.promise().query(command, [title, desc, id, todo_id]);
 
     res.status(200).json({
       status: "Success",
