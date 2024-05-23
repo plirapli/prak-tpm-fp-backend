@@ -33,7 +33,6 @@ const insertTodo = async (req, res) => {
       error.statusCode = 401;
       throw error;
     }
-
     const command =
       "INSERT INTO todos (title, description, user_id) VALUES (?, ?, ?)";
     await connection.promise().query(command, [title, desc, id]);
@@ -52,16 +51,22 @@ const insertTodo = async (req, res) => {
 
 const checkTodo = async (req, res) => {
   try {
-    const { id } = req.params;
-    const command = `UPDATE todos SET is_completed = ? WHERE id = ?`;
-    await connection.promise().query(command, [1, id]);
+    const { todo_id } = req.params;
+    const { id } = req.decoded;
+    const { is_completed } = req.body;
+    if (!is_completed) {
+      const error = new Error("Field cannot be empty 😠");
+      error.statusCode = 401;
+      throw error;
+    }
+    const command = `UPDATE todos SET is_completed=? WHERE user_id=? AND id=?`;
+    await connection.promise().query(command, [is_completed, id, todo_id]);
 
     res.status(200).json({
       status: "Success",
-      message: "Todo updated",
+      message: is_completed == 1 ? "Todo checked" : "Todo unchecked",
     });
   } catch (err) {
-    // mengirimkan respons jika gagal
     res.status(err.statusCode || 500).json({
       status: "Error",
       message: err.message,
@@ -83,8 +88,7 @@ const updateTodo = async (req, res) => {
       error.statusCode = 401;
       throw error;
     }
-
-    const command = `UPDATE todos SET title=?, description=?, image WHERE user_id=? AND id=?`;
+    const command = `UPDATE todos SET title=?, description=?, img=? WHERE user_id=? AND id=?`;
     await connection.promise().query(command, [title, desc, img, id, todo_id]);
 
     res.status(200).json({
