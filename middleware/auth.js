@@ -11,7 +11,7 @@ const getToken = (req, res, next) => {
       jwt.verify(token, secret, (err, decoded) => {
         if (err) {
           const error = new Error("Invalid Credential 😡");
-          error.statusCode = 403;
+          error.statusCode = 401;
           throw error;
         } else {
           req.decoded = decoded;
@@ -20,7 +20,7 @@ const getToken = (req, res, next) => {
       });
     } else {
       const error = new Error("You need to login first 😠");
-      error.statusCode = 403;
+      error.statusCode = 401;
       throw error;
     }
   } catch (error) {
