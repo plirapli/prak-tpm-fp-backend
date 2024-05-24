@@ -15,6 +15,4 @@ app.use("/user", userRouter);
 app.use("/todos", todoRouter);
 
 // Menjalankan server di port 3001
-app.listen(port, () => {
-  console.log("Server terkoneksi pada port 3001");
-});
+app.listen(port, () => console.log("Server connected on port " + port));
