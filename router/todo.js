@@ -2,9 +2,11 @@ const router = require("express").Router();
 const verify = require("../middleware/auth");
 const todo = require("../controller/todo");
 
-// [GET] /:uername
+// [GET] /
 router.get("/", verify, todo.getTodo);
-// [POST] /:id
+// [GET] /:id
+router.get("/:todo_id", verify, todo.getTodoById);
+// [POST] /
 router.post("/", verify, todo.insertTodo);
 // [PUT] check/:id
 router.put("/check/:todo_id", verify, todo.checkTodo);
