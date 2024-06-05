@@ -4,8 +4,29 @@ const getTodo = async (req, res) => {
   try {
     const { id } = req.decoded;
     const command =
-      "SELECT id, title, description, is_completed, created_at FROM todos WHERE user_id = ?";
+      "SELECT id, title, description, is_completed, color, updated_at, created_at FROM todos WHERE user_id = ?";
     const [data] = await connection.promise().query(command, [id]);
+
+    res.status(200).json({
+      status: "Success",
+      message: "Successfully retrieved todo list by id",
+      data: data,
+    });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      status: "Error",
+      message: error.message,
+    });
+  }
+};
+
+const getTodoById = async (req, res) => {
+  try {
+    const { id } = req.decoded;
+    const { todo_id } = req.params;
+    const command =
+      "SELECT id, title, description, is_completed, color, updated_at, created_at FROM todos WHERE user_id = ? AND id = ?";
+    const [[data]] = await connection.promise().query(command, [id, todo_id]);
 
     res.status(200).json({
       status: "Success",
@@ -23,7 +44,7 @@ const getTodo = async (req, res) => {
 const insertTodo = async (req, res) => {
   try {
     const { id } = req.decoded;
-    const { title, desc } = req.body;
+    const { title, desc, color } = req.body;
 
     if (!title || !desc) {
       const msg = `${
@@ -34,8 +55,8 @@ const insertTodo = async (req, res) => {
       throw error;
     }
     const command =
-      "INSERT INTO todos (title, description, user_id) VALUES (?, ?, ?)";
-    await connection.promise().query(command, [title, desc, id]);
+      "INSERT INTO todos (title, description, color, user_id) VALUES (?, ?, ?, ?)";
+    await connection.promise().query(command, [title, desc, color, id]);
 
     res.status(201).json({
       status: "Success",
@@ -78,19 +99,21 @@ const updateTodo = async (req, res) => {
   try {
     const { todo_id } = req.params;
     const { id } = req.decoded;
-    const { title, desc } = req.body;
+    const { title, desc, color } = req.body;
     const img = req.file?.img;
 
-    if (!title || !desc) {
+    if (!title || !desc || !color) {
       const msg = `${
-        !title ? "Title" : "Description"
+        !title ? "Title" : !desc ? "Description" : "Color"
       } field cannot be empty 😠`;
       const error = new Error(msg);
       error.statusCode = 401;
       throw error;
     }
-    const command = `UPDATE todos SET title=?, description=? WHERE user_id=? AND id=?`;
-    await connection.promise().query(command, [title, desc, id, todo_id]);
+    const command = `UPDATE todos SET title=?, description=?, color=? WHERE user_id=? AND id=?`;
+    await connection
+      .promise()
+      .query(command, [title, desc, color, id, todo_id]);
 
     res.status(200).json({
       status: "Success",
@@ -113,7 +136,7 @@ const deleteTodo = async (req, res) => {
 
     res.status(200).json({
       status: "Success",
-      message: "Berhasil menghapus todo",
+      message: "Todo deleted",
     });
   } catch (err) {
     res.status(err.statusCode || 500).json({
@@ -123,4 +146,11 @@ const deleteTodo = async (req, res) => {
   }
 };
 
-module.exports = { getTodo, insertTodo, updateTodo, checkTodo, deleteTodo };
+module.exports = {
+  getTodo,
+  getTodoById,
+  insertTodo,
+  updateTodo,
+  checkTodo,
+  deleteTodo,
+};
