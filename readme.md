@@ -9,3 +9,5 @@
 7. Jalankan service dengan cara mengetik `npm run dev` untuk mode development atau `npm run start` untuk mode production
 
 ## Dokumentasi
+
+Males hehehe 😁
